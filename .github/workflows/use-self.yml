@@ -1,0 +1,20 @@
+name: Use Self
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
+      - closed
+
+jobs:
+  git-tag-semver-from-label:
+    uses: ./.github/workflows/git-tag-semver-from-label.yml
+    permissions:
+      contents: write
+      pull-requests: write
