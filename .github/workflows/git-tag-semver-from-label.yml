@@ -33,30 +33,27 @@ jobs:
           else
             echo "skip=false" >> "${GITHUB_OUTPUT}"
           fi
-  git-tag-semver-from-label:
-    runs-on: ubuntu-22.04
+  check-has-semver-label:
     needs:
       - check-event
     if: ${{ needs.check-event.outputs.skip != 'true' }}
+    permissions:
+      pull-requests: write
+    uses: infrastructure-blocks/check-has-semver-label-workflow/.github/workflows/check-has-semver-label.yml@v1
+  git-tag-semver-from-label:
+    runs-on: ubuntu-22.04
+    needs:
+      - check-has-semver-label
     outputs:
       tags: ${{ steps.git-tag.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
-      - uses: infrastructure-blocks/check-labels-action@v1
-        id: check-labels
-        with:
-          one-of: no version, patch, minor, major
-      - if: ${{ failure() }}
-        uses: infrastructure-blocks/status-report-action@v1
-        with:
-          body: |
-            :boom: **Error**: expecting exactly one semantic versioning PR label. Please provide one of "no version", "patch", "minor", "major"
 
       # Determining which branch we will be taking on later.
       - name: Evaluating operation context
         id: context
         run: |
-          if [[ "${{ steps.check-labels.outputs.matched-labels }}" == "no version" ]]
+          if [[ "${{ needs.check-has-semver-label.outputs.matched-label }}" == "no version" ]]
           then
             echo "state=no-version" >> "${GITHUB_OUTPUT}"
           elif [[ "${{ github.event.action == 'closed' && github.event.pull_request.merged }}" != "true" ]]
@@ -70,13 +67,13 @@ jobs:
         uses: infrastructure-blocks/status-report-action@v1
         with:
           body: |
-            :+1:  **Notice**: found "${{ steps.check-labels.outputs.matched-labels }}" label, understood. Won't be tagging.
+            :+1:  **Notice**: found "${{ needs.check-has-semver-label.outputs.matched-label }}" label, understood. Won't be tagging.
 
       - if: ${{ steps.context.outputs.state == 'developing' }}
         uses: infrastructure-blocks/status-report-action@v1
         with:
           body: |
-            :+1:  **Notice**: found "${{ steps.check-labels.outputs.matched-labels }}" label, understood. Will be tagging release branch ${{ github.base_ref }} upon merge.
+            :+1:  **Notice**: found "${{ needs.check-has-semver-label.outputs.matched-label }}" label, understood. Will be tagging release branch ${{ github.base_ref }} upon merge.
 
       # If we are releasing
       - if: ${{ steps.context.outputs.state == 'releasing' }}
@@ -90,7 +87,7 @@ jobs:
         id: git-tag
         uses: infrastructure-blocks/git-tag-semver-action@v1
         with:
-          version: ${{ steps.check-labels.outputs.matched-labels }}
+          version: ${{ needs.check-has-semver-label.outputs.matched-label }}
       # Report success or failure back as PR comment.
       - if: ${{ steps.context.outputs.state == 'releasing' }}
         uses: infrastructure-blocks/status-report-action@v1
@@ -106,5 +103,5 @@ jobs:
         uses: infrastructure-blocks/status-report-action@v1
         with:
           body: |
-            :boom: **Error**: Tagging release branch ${{ github.base_ref }} with version bump {{ steps.check-labels.outputs.matched-labels }}
+            :boom: **Error**: Tagging release branch ${{ github.base_ref }} with version bump ${{ needs.check-has-semver-label.outputs.matched-label }}
             See [action logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }})
