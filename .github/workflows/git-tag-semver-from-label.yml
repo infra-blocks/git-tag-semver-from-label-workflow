@@ -33,6 +33,8 @@ jobs:
     steps:
       - id: get-current-pr
         uses: 8BitJonny/gh-get-current-pr@2.2.0
+        with:
+          sha: ${{ inputs.sha }}
       - if: ${{ steps.get-current-pr.outputs.pr_found == 'false' }}
         run: |
           echo "::error::no matching PR found!"
