@@ -57,4 +57,4 @@ jobs:
       version: ${{ needs.check-has-semver-label.outputs.matched-label }}
       sha: ${{ inputs.sha }}
     secrets:
-      github-token: ${{ secrets.PAT }}
+      github-token: ${{ secrets.github-token }}
