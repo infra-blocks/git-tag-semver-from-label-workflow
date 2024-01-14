@@ -1,29 +1,30 @@
 # git-tag-semver-from-label-workflow
 
-This workflow is used to automatically manage semantic tags on a release branch leveraging PR labels.
+This workflow is used to automatically manage semantic versioning tags based on PR labels.
 
-It's meant to be run on PR events (including labeling events) and parse out 1 of the 4 listed
-labels:
-- no version
-- patch
-- minor
-- major
+The PR *should* have one valid label at all times and *must* have one such label upon invocation of this workflow.
+See [check-has-semver-label-workflow](https://github.com/infrastructure-blocks/check-has-semver-label-workflow) for
+details on the required PR label. To enforce the presence of such a label, we also recommended setting up
+[check-has-semver-label-workflow](https://github.com/infrastructure-blocks/check-has-semver-label-workflow) on PR
+events as a different workflow.
 
-Every PR should have a label. If the PR isn't meant to release a version, then `no version` label
-should be applied to it.
-
-All other 3 labels will produce/update 3 tags on the repository upon merging the PR.
-See [here](https://github.com/infrastructure-blocks/git-tag-semver-action) for more information on the tagging behavior.
+This workflow gets the current PR, extracts the semver label and tags the git tree accordingly.
+See [git-tag-semver-action](https://github.com/infrastructure-blocks/git-tag-semver-action) for more information on
+the tagging behavior.
 
 PR comments will be emitted to notify the users or errors/notices/successes.
 
 ## Inputs
 
-N/A
+| Name | Required | Description                                                                                                                                                                                                                                                                                                                               |
+|:----:|:--------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| sha  |  false   | The commit SHA to tag. Defaults to the ${{ github.sha }}. If the event triggering this workflow is of type pull_request, be sure to set this parameter to either ${{ github.event.pull_request.head.sha }} or ${{ github.event.pull_request.base.sha }}. You probably don't want to tag the PR's default SHA, which is on a merge branch. |
 
 ## Secrets
 
-N/A
+|     Name     | Required | Description                                                                                                                                                                                                                                                                      |
+|:------------:|:--------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| github-token |  false   | The GitHub token utilized to push the tags. If pushing a tag matching a protection rule, this should be a PAT. Defaults to the $GITHUB_TOKEN otherwise. Note that the workflow still utilizes the $GITHUB_TOKEN for other operations, such as posting status report PR comments. |
 
 ## Outputs
 
@@ -40,38 +41,42 @@ N/A
 
 ## Concurrency controls
 
-Because this workflow is meant to be called on several different types of pull_request events, we mostly
-only care about the state of the PR of the latest event. Hence, we cancel any ongoing workflow.
+No concurrency is defined at this workflow's level. If any is required, it should be defined in the caller workflow.
 
-|       Field        |                  Value                   |
-|:------------------:|:----------------------------------------:|
-|       group        | ${{ github.workflow }}-${{ github.ref }} |
-| cancel-in-progress |                   true                   |
+On push events to release branch, however, we recommend setting the following concurrency:
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+```
+
+If you set up your PRs so that they must be up to date before merging, then the likelihood of concurrent jobs
+diminishes. In the event that it still happens, this concurrency setting will queue **the most recent** invocation
+until the ongoing one terminates. It would have been better if we could have a longer queue, but, at the time of
+this writing, such is the limitation of the GitHub Actions engine.
 
 ## Usage
 
-```yaml
-name: Git Tag Semver From Label
+### Upon merging on a release branch
 
-# Running on all those events allow to check for the proper existence of a versioning tag.
+```yaml
+name: Git Tag Semver Release From Label
+
 on:
-  pull_request:
+  push:
     branches:
-      - master
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
-      - unlabeled
-      - closed
+      - your-release-branch
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   git-tag-semver-from-label:
-    uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/git-tag-semver-from-label.yml@v1
+    uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/git-tag-semver-from-label.yml@v2
     permissions:
       contents: write
       pull-requests: write
+    secrets:
+      github-token: ${{ secrets.PAT }} # Required to push against protected tags
 ```
 
 ### Releasing

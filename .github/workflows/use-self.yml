@@ -1,16 +1,12 @@
 name: Use Self
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
-      - unlabeled
-      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   git-tag-semver-from-label:
@@ -18,3 +14,5 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    secrets:
+      github-token: ${{ secrets.PAT }}

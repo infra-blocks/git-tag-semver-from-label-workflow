@@ -2,6 +2,18 @@ name: Git Tag Semver From Label
 
 on:
   workflow_call:
+    inputs:
+      sha:
+        type: string
+        description: |
+          The commit SHA to tag. Defaults to the GITHUB_SHA.
+        required: false
+        default: ${{ github.sha }}
+    secrets:
+      github-token:
+        description: |
+          The GitHub token utilized to push the tags. Defaults to the GITHUB_TOKEN otherwise.
+        required: false
     outputs:
       tags:
         description: A JSON array of tags applied to the HEAD commit.
@@ -11,97 +23,38 @@ permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  status-report-action-repository: infrastructure-blocks/git-tag-semver-from-label-workflow
-
 jobs:
-  check-event:
+  get-current-pr:
     runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: read
     outputs:
-      skip: ${{ steps.check-event.outputs.skip }}
+      pull-request: ${{ steps.get-current-pr.outputs.pr }}
     steps:
-      - id: check-event
+      - id: get-current-pr
+        uses: 8BitJonny/gh-get-current-pr@2.2.0
+      - if: ${{ steps.get-current-pr.outputs.pr_found == 'false' }}
         run: |
-          # We should skip if we are processing a close event without a merge.
-          if [[ "${{ github.event.action == 'closed' && !github.event.pull_request.merged }}" == "true" ]]
-          then
-            echo "skip=true" >> "${GITHUB_OUTPUT}"
-          else
-            echo "skip=false" >> "${GITHUB_OUTPUT}"
-          fi
+          echo "::error::no matching PR found!"
+          exit 1
   check-has-semver-label:
     needs:
-      - check-event
-    if: ${{ needs.check-event.outputs.skip != 'true' }}
+      - get-current-pr
     permissions:
       pull-requests: write
     uses: infrastructure-blocks/check-has-semver-label-workflow/.github/workflows/check-has-semver-label.yml@v1
-  git-tag-semver-from-label:
-    runs-on: ubuntu-22.04
+    with:
+      pull-request: ${{ needs.get-current-pr.outputs.pull-request }}
+  git-tag-semver:
     needs:
       - check-has-semver-label
-    outputs:
-      tags: ${{ steps.git-tag.outputs.tags }}
-    steps:
-      - uses: actions/checkout@v4
-
-      # Determining which branch we will be taking on later.
-      - name: Evaluating operation context
-        id: context
-        run: |
-          if [[ "${{ needs.check-has-semver-label.outputs.matched-label }}" == "no version" ]]
-          then
-            echo "state=no-version" >> "${GITHUB_OUTPUT}"
-          elif [[ "${{ github.event.action == 'closed' && github.event.pull_request.merged }}" != "true" ]]
-          then
-            echo "state=developing" >> "${GITHUB_OUTPUT}"
-          else
-            echo "state=releasing" >> "${GITHUB_OUTPUT}"
-          fi
-
-      - if: ${{ steps.context.outputs.state == 'no-version' }}
-        uses: infrastructure-blocks/status-report-action@v1
-        with:
-          body: |
-            :+1:  **Notice**: found "${{ needs.check-has-semver-label.outputs.matched-label }}" label, understood. Won't be tagging.
-
-      - if: ${{ steps.context.outputs.state == 'developing' }}
-        uses: infrastructure-blocks/status-report-action@v1
-        with:
-          body: |
-            :+1:  **Notice**: found "${{ needs.check-has-semver-label.outputs.matched-label }}" label, understood. Will be tagging release branch ${{ github.base_ref }} upon merge.
-
-      # If we are releasing
-      - if: ${{ steps.context.outputs.state == 'releasing' }}
-        id: checkout-release-branch
-        run: |
-          git checkout "${{ github.base_ref }}"
-          commit_sha=$(git rev-parse --short HEAD)
-          echo "commit-sha=${commit_sha}" >> ${GITHUB_OUTPUT}
-      # Then we tag and push.
-      - if: ${{ steps.context.outputs.state == 'releasing' }}
-        id: git-tag
-        uses: infrastructure-blocks/git-tag-semver-action@v1
-        with:
-          version: ${{ needs.check-has-semver-label.outputs.matched-label }}
-      # Report success or failure back as PR comment.
-      - if: ${{ steps.context.outputs.state == 'releasing' }}
-        uses: infrastructure-blocks/status-report-action@v1
-        with:
-          body: |
-            :rocket: **Success**: Branch ${{ github.base_ref }} tagged!
-              Commit: ${{ steps.checkout-release-branch.outputs.commit-sha }}
-              Tags:
-                - [${{ fromJson(steps.git-tag.outputs.tags)[0] }}](https://github.com/${{ github.repository }}/releases/tag/${{ fromJson(steps.git-tag.outputs.tags)[0] }})
-                - [${{ fromJson(steps.git-tag.outputs.tags)[1] }}](https://github.com/${{ github.repository }}/releases/tag/${{ fromJson(steps.git-tag.outputs.tags)[1] }})
-                - [${{ fromJson(steps.git-tag.outputs.tags)[2] }}](https://github.com/${{ github.repository }}/releases/tag/${{ fromJson(steps.git-tag.outputs.tags)[2] }})
-      - if: ${{ failure() && steps.context.outputs.state == 'releasing' }}
-        uses: infrastructure-blocks/status-report-action@v1
-        with:
-          body: |
-            :boom: **Error**: Tagging release branch ${{ github.base_ref }} with version bump ${{ needs.check-has-semver-label.outputs.matched-label }}
-            See [action logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }})
+    if: ${{ needs.check-has-semver-label.outputs.matched-label != 'no version' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: infrastructure-blocks/git-tag-semver-workflow/.github/workflows/git-tag-semver.yml@v1
+    with:
+      version: ${{ needs.check-has-semver-label.outputs.matched-label }}
+      sha: ${{ inputs.sha }}
+    secrets:
+      github-token: ${{ secrets.PAT }}
