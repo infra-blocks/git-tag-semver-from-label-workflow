@@ -17,6 +17,37 @@ See [here](https://github.com/infrastructure-blocks/git-tag-semver-action) for m
 
 PR comments will be emitted to notify the users or errors/notices/successes.
 
+## Inputs
+
+N/A
+
+## Secrets
+
+N/A
+
+## Outputs
+
+| Name | Description                                                               |
+|:----:|---------------------------------------------------------------------------|
+| tags | A stringified JSON array containing the tags pushed against the git tree. |
+
+## Permissions
+
+|     Scope     | Level | Reason                                                       |
+|:-------------:|:-----:|--------------------------------------------------------------|
+|   contents    | write | Required to push tags.                                       |
+| pull-requests | write | Required to post comments about the status of this workflow. |
+
+## Concurrency controls
+
+Because this workflow is meant to be called on several different types of pull_request events, we mostly
+only care about the state of the PR of the latest event. Hence, we cancel any ongoing workflow.
+
+|       Field        |                  Value                   |
+|:------------------:|:----------------------------------------:|
+|       group        | ${{ github.workflow }}-${{ github.ref }} |
+| cancel-in-progress |                   true                   |
+
 ## Usage
 
 ```yaml
@@ -39,8 +70,8 @@ jobs:
   git-tag-semver-from-label:
     uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/git-tag-semver-from-label.yml@v1
     permissions:
-      contents: write # Required to push tags
-      pull-requests: write # Required to push PR comments
+      contents: write
+      pull-requests: write
 ```
 
 ### Releasing
