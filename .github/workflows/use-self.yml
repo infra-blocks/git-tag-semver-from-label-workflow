@@ -1,9 +1,13 @@
-name: Use Self
+name: Git Tag Semver From Label
 
 on:
   push:
     branches:
       - master
+
+permissions:
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
