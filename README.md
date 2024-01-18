@@ -54,6 +54,10 @@ diminishes. In the event that it still happens, this concurrency setting will qu
 until the ongoing one terminates. It would have been better if we could have a longer queue, but, at the time of
 this writing, such is the limitation of the GitHub Actions engine.
 
+## Timeouts
+
+N/A
+
 ## Usage
 
 ### Upon merging on a release branch
@@ -71,7 +75,7 @@ concurrency:
 
 jobs:
   git-tag-semver-from-label:
-    uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/git-tag-semver-from-label.yml@v2
+    uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/workflow.yml@v2
     permissions:
       contents: write
       pull-requests: write

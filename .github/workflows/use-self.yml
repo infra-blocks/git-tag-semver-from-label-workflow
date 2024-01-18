@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   git-tag-semver-from-label:
-    uses: ./.github/workflows/git-tag-semver-from-label.yml
+    uses: ./.github/workflows/workflow.yml
     permissions:
       contents: write
       pull-requests: write
