@@ -1,4 +1,6 @@
 # git-tag-semver-from-label-workflow
+[![Git Tag Semver From Label](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/use-self.yml/badge.svg)](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/use-self.yml)
+[![Update From Template](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml)
 
 This workflow is used to automatically manage semantic versioning tags based on PR labels.
 
