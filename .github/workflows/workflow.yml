@@ -2,13 +2,6 @@ name: Git Tag Semver From Label
 
 on:
   workflow_call:
-    inputs:
-      sha:
-        type: string
-        description: |
-          The commit SHA to tag. Defaults to the GITHUB_SHA.
-        required: false
-        default: ${{ github.sha }}
     secrets:
       github-token:
         description: |
@@ -29,16 +22,10 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      pull-request: ${{ steps.get-current-pr.outputs.pr }}
+      pull-request: ${{ steps.get-current-pr.outputs.json }}
     steps:
       - id: get-current-pr
-        uses: 8BitJonny/gh-get-current-pr@2.2.0
-        with:
-          sha: ${{ inputs.sha }}
-      - if: ${{ steps.get-current-pr.outputs.pr_found == 'false' }}
-        run: |
-          echo "::error::no matching PR found!"
-          exit 1
+        uses: infrastructure-blocks/get-current-pull-request-action@v1
   check-has-semver-label:
     needs:
       - get-current-pr
@@ -57,6 +44,5 @@ jobs:
     uses: infrastructure-blocks/git-tag-semver-workflow/.github/workflows/workflow.yml@v1
     with:
       version: ${{ needs.check-has-semver-label.outputs.matched-label }}
-      sha: ${{ inputs.sha }}
     secrets:
       github-token: ${{ secrets.github-token }}
