@@ -18,9 +18,7 @@ PR comments will be emitted to notify the users or errors/notices/successes.
 
 ## Inputs
 
-| Name | Required | Description                                                                                                                                                                                                                                                                                                                               |
-|:----:|:--------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| sha  |  false   | The commit SHA to tag. Defaults to the ${{ github.sha }}. If the event triggering this workflow is of type pull_request, be sure to set this parameter to either ${{ github.event.pull_request.head.sha }} or ${{ github.event.pull_request.base.sha }}. You probably don't want to tag the PR's default SHA, which is on a merge branch. |
+N/A
 
 ## Secrets
 
