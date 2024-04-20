@@ -18,7 +18,9 @@ PR comments will be emitted to notify the users or errors/notices/successes.
 
 ## Inputs
 
-N/A
+|     Name      | Required | Description                                                                                                                                                                  |
+|:-------------:|:--------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|     skip      |  false   | A boolean indicating whether to skip the workflow. This is to workaround the required checks discrepancy when the workflow is skipped from the caller. It defaults to false. |
 
 ## Secrets
 
