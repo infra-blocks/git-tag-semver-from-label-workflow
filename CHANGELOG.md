@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<<<<<<< HEAD
 ## [3.0.1] - 2024-03-17
 
 ### Changed
@@ -63,11 +64,15 @@ We added the `inputs.sha` to allow the caller to specify the commit SHA to tag. 
 - Leverage `status-report-action` internally to post PR comments.
 
 ## [1.0.0] - 2023-12-29
+=======
+## [1.0.0] - 2024-05-01
+>>>>>>> template/master
 
 ### Added
 
 - First release!
 
+<<<<<<< HEAD
 [3.0.1]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/compare/v2.1.1...v3.0.0
 [2.1.1]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/compare/v2.1.0...v2.1.1
@@ -78,3 +83,6 @@ We added the `inputs.sha` to allow the caller to specify the commit SHA to tag. 
 [1.0.2]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/releases/tag/v1.0.0
+=======
+[1.0.0]: https://github.com/infrastructure-blocks/github-actions-workflow-template/releases/tag/v0.1.0
+>>>>>>> template/master

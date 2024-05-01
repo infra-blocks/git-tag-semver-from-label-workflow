@@ -23,14 +23,19 @@ permissions:
   pull-requests: write
 
 jobs:
+<<<<<<< HEAD
   get-current-pr:
     if: ${{ !inputs.skip }}
+=======
+  example-job:
+>>>>>>> template/master
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: read
     outputs:
       pull-request: ${{ steps.get-current-pr.outputs.json }}
     steps:
+<<<<<<< HEAD
       - id: get-current-pr
         uses: infrastructure-blocks/get-current-pull-request-action@v1
   check-has-semver-label:
@@ -55,3 +60,14 @@ jobs:
       skip: ${{ inputs.skip }}
     secrets:
       github-token: ${{ secrets.github-token }}
+=======
+      # This condition should be on every step.
+      - if: ${{ !inputs.skip }}
+        id: example-step
+        name: Example step
+        env:
+          BIG_SECRET: ${{ secrets.example-secret }}
+        run: |
+          echo "your input: ${{ inputs.example-input }}"
+          echo "example-output=toto" >> "${GITHUB_OUTPUT}"
+>>>>>>> template/master
