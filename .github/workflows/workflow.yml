@@ -32,13 +32,13 @@ jobs:
       pull-request: ${{ steps.get-current-pr.outputs.json }}
     steps:
       - id: get-current-pr
-        uses: infrastructure-blocks/get-current-pull-request-action@v1
+        uses: infra-blocks/get-current-pull-request-action@v1
   check-has-semver-label:
     needs:
       - get-current-pr
     permissions:
       pull-requests: write
-    uses: infrastructure-blocks/check-has-semver-label-workflow/.github/workflows/workflow.yml@v1
+    uses: infra-blocks/check-has-semver-label-workflow/.github/workflows/workflow.yml@v1
     with:
       pull-request: ${{ needs.get-current-pr.outputs.pull-request }}
       skip: ${{ inputs.skip }}
@@ -49,7 +49,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: infrastructure-blocks/git-tag-semver-workflow/.github/workflows/workflow.yml@v1
+    uses: infra-blocks/git-tag-semver-workflow/.github/workflows/workflow.yml@v1
     with:
       version: ${{ needs.check-has-semver-label.outputs.matched-label }}
       skip: ${{ inputs.skip }}
