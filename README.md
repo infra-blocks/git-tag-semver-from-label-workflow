@@ -1,17 +1,17 @@
 # git-tag-semver-from-label-workflow
-[![Release](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/release.yml/badge.svg)](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/release.yml)
-[![Update From Template](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml)
+[![Release](https://github.com/infra-blocks/git-tag-semver-from-label-workflow/actions/workflows/release.yml/badge.svg)](https://github.com/infra-blocks/git-tag-semver-from-label-workflow/actions/workflows/release.yml)
+[![Update From Template](https://github.com/infra-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infra-blocks/git-tag-semver-from-label-workflow/actions/workflows/update-from-template.yml)
 
 This workflow is used to automatically manage semantic versioning tags based on PR labels.
 
 The PR *should* have one valid label at all times and *must* have one such label upon invocation of this workflow.
-See [check-has-semver-label-workflow](https://github.com/infrastructure-blocks/check-has-semver-label-workflow) for
+See [check-has-semver-label-workflow](https://github.com/infra-blocks/check-has-semver-label-workflow) for
 details on the required PR label. To enforce the presence of such a label, we also recommended setting up
-[check-has-semver-label-workflow](https://github.com/infrastructure-blocks/check-has-semver-label-workflow) on PR
+[check-has-semver-label-workflow](https://github.com/infra-blocks/check-has-semver-label-workflow) on PR
 events as a different workflow.
 
 This workflow gets the current PR, extracts the semver label and tags the git tree accordingly.
-See [git-tag-semver-action](https://github.com/infrastructure-blocks/git-tag-semver-action) for more information on
+See [git-tag-semver-action](https://github.com/infra-blocks/git-tag-semver-action) for more information on
 the tagging behavior.
 
 PR comments will be emitted to notify the users or errors/notices/successes.
@@ -77,7 +77,7 @@ concurrency:
 
 jobs:
   git-tag-semver-from-label:
-    uses: infrastructure-blocks/git-tag-semver-from-label-workflow/.github/workflows/workflow.yml@v2
+    uses: infra-blocks/git-tag-semver-from-label-workflow/.github/workflows/workflow.yml@v2
     permissions:
       contents: write
       pull-requests: write
@@ -88,4 +88,4 @@ jobs:
 ### Releasing
 
 The releasing is handled at git level with semantic versioning tags. Those are automatically generated and managed
-by the [git-tag-semver-from-label-workflow](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow).
+by the [git-tag-semver-from-label-workflow](https://github.com/infra-blocks/git-tag-semver-from-label-workflow).
